@@ -27,6 +27,7 @@ This example was meant as a template so that you can reuse this method with any 
 # How to Build and Create Apprenda Archive
 - Clone this repository
 - Make any necessary modification to the Cake files
-- Make any necessary modifications to the source code for the Application you intend to package
+- Make any necessary modifications to the source code for the application you intend to package
 - Simply execute .\build.ps1 from a PowerShell window and watch Cake do its magic
-- You will find Apprenda application package (.zip file) in the folder 
+- The binaries for your application will go to folder \{applicationName}_Binaries
+- You will find Apprenda application package (.zip file) in the folder \{applicationName}__ApprendaArchive. You can deploy this zip file to the Apprenda Cloud Platform directly using the Developer Portal, or can use this file as part of a larger CI/CD system that automatically deploys applications to Apprenda

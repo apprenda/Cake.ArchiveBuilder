@@ -7,7 +7,7 @@ public class BuildParameters
 
     public string SolutionFilePath { get; set; }
 
-    public string ArchivePath { get; set; }
+    public string StagingPath { get; set; }
     public string WcfName { get; set; }
     public string UiPublishPath { get; set; }
     public string WcfBinariesPath { get; set; }
@@ -35,6 +35,8 @@ public class BuildParameters
         var uiName = "root";
         var wcfName = "TimeCard.Service";
         var sourcePath = "./src";
+        var manifestPath = "root/DeploymentManifest.xml";
+        var provisioningScriptPath = "ApplicationProvisioning_Script.sql";
         // End - Configurable data
 
         var outputPath = $"./{applicationName}_ApprendaArchive";
@@ -44,14 +46,14 @@ public class BuildParameters
         {
             Target = target,
             Configuration = configuration,
-            OutputPath = outputPath,
+            OutputPath = $"{outputPath}",
             SolutionFilePath = $"{sourcePath}/{applicationName}.sln",
-            ArchivePath = $"{stagingPath}",
+            StagingPath = $"{stagingPath}",
             WcfName = wcfName,
             UiPublishPath = $"{sourcePath}/{uiName}/ReleaseBuild",
             WcfBinariesPath = $"{sourcePath}/{wcfName}/bin/{configuration}",
-            DataTierProvisioningScript = $"{sourcePath}/ApplicationProvisioning_Script.sql",
-            ApplicationManifest = $"{sourcePath}/root/DeploymentManifest.xml",
+            DataTierProvisioningScript = $"{sourcePath}/{provisioningScriptPath}",
+            ApplicationManifest = $"{sourcePath}/{manifestPath}",
             ApprendaArchive = $"{outputPath}/{applicationName}.zip",
         };
     }

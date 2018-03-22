@@ -14,9 +14,9 @@
 
 # Build
 tools/*
-!tools/packages.config
 TimeCard_ApprendaArchive/
 TimeCard_Binaries/
+**/ReleaseBuild
 
 # MacOS
 .DS_Store

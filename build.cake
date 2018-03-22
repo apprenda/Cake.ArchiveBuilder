@@ -2,7 +2,7 @@
 
 #load "./build/parameters.cake"
 
-var Parameters = BuildParameters.Load(Context, BuildSystem);
+var Parameters = BuildParameters.Load(Context);
 
 Setup(context => {
     Information($"Running build: {Parameters.Target} {Parameters.Configuration}");
@@ -24,8 +24,7 @@ Task("Build-Solution")
     });
 
 Task("Build")
-    .IsDependentOn("Build-Solution")
-    .Does(() => {});
+    .IsDependentOn("Build-Solution");
 
 Task("Prep-Output-Directories")
     .Does(() => {
@@ -39,10 +38,11 @@ Task("Prep-Output-Directories")
 Task("Create-Apprenda-Archive")
     .IsDependentOn("Prep-Output-Directories")
     .Does(() => {
-        var uiArchivePath = $"{Parameters.StagingPath}/interfaces/root";
-        var wcfArchivePath = $"{Parameters.StagingPath}/services/{Parameters.WcfName}";
-        var persistenceScriptPath = $"{Parameters.StagingPath}/persistence/scripts";
-        var manifest = $"{Parameters.StagingPath}/DeploymentManifest.xml";
+        var uiArchivePath = Parameters.StagingPath.Combine("interfaces/root");
+        var wcfArchivePath = Parameters.StagingPath.Combine($"services/{Parameters.WcfName}");
+        var persistenceScriptPath = Parameters.StagingPath.Combine("persistence/scripts");
+        var manifestFilePath = Parameters.StagingPath.CombineWithFilePath("DeploymentManifest.xml");
+        var persistenceScriptFilePath = persistenceScriptPath.CombineWithFilePath("ApplicationProvisioning_Script.sql");
 
         EnsureDirectoryExists(uiArchivePath);
         EnsureDirectoryExists(wcfArchivePath);
@@ -55,24 +55,20 @@ Task("Create-Apprenda-Archive")
         DeleteFiles($"{uiArchivePath}/**/*.pdb");
         DeleteFiles($"{uiArchivePath}/DeploymentManifest.xml");
 
-        CopyFile(Parameters.DataTierProvisioningScript, $"{persistenceScriptPath}/ApplicationProvisioning_Script.sql");
-        CopyFile(Parameters.ApplicationManifest, manifest);
+        CopyFile(Parameters.DataTierProvisioningScriptFilePath, persistenceScriptFilePath);
+        CopyFile(Parameters.ApplicationManifestFilePath, manifestFilePath);
 
-        Zip(Parameters.StagingPath, Parameters.ApprendaArchive);
+        Zip(Parameters.StagingPath, Parameters.ApprendaArchiveFilePath);
     });
 
 Task("Package")
-    .IsDependentOn("Create-Apprenda-Archive")
-    .Does(() => {});
+    .IsDependentOn("Create-Apprenda-Archive");
 
 Task("Prepare-Artifacts")
     .IsDependentOn("Build")
-    .IsDependentOn("Package")
-    .Does(()=> {});
+    .IsDependentOn("Package");
 
 Task("Default")
-    .Does(() => {
-        RunTarget("Prepare-Artifacts");
-    });
+    .IsDependentOn("Prepare-Artifacts");
 
 RunTarget(Parameters.Target);

@@ -3,58 +3,51 @@ public class BuildParameters
     public string Target { get; set; }
     public string Configuration { get; set; }
 
-    public string OutputPath { get; set; }
-
-    public string SolutionFilePath { get; set; }
-
-    public string StagingPath { get; set; }
     public string WcfName { get; set; }
-    public string UiPublishPath { get; set; }
-    public string WcfBinariesPath { get; set; }
-    public string DataTierProvisioningScript { get; set; }
-    public string ApplicationManifest { get; set; }
-    public string ApprendaArchive { get; set; }
+    public DirectoryPath OutputPath { get; set; }
+    public DirectoryPath StagingPath { get; set; }
+    public DirectoryPath UiPublishPath { get; set; }
+    public DirectoryPath WcfBinariesPath { get; set; }
+    public FilePath SolutionFilePath { get; set; }
+    public FilePath DataTierProvisioningScriptFilePath { get; set; }
+    public FilePath ApplicationManifestFilePath { get; set; }
+    public FilePath ApprendaArchiveFilePath { get; set; }
 
-    public static BuildParameters Load(ICakeContext context, BuildSystem buildSystem)
+    public static BuildParameters Load(ICakeContext context)
     {
         if (context == null)
         {
             throw new ArgumentNullException(nameof(context));
         }
 
-        if (buildSystem == null)
-        {
-            throw new ArgumentNullException(nameof(buildSystem));
-        }
-
-        var target = context.Arguments.GetArgument("Target") ?? "Default";
-        var configuration = context.Arguments.GetArgument("Configuration") ?? "Release";
+        var target = context.Argument("Target", "Default");
+        var configuration = context.Argument("Configuration", "Release");
+        //Alternative way: var configuration = context.Arguments.GetArgument("Configuration") ?? "Release";
 
         // Start - Configurable data
         var applicationName = "TimeCard";
         var uiName = "root";
         var wcfName = "TimeCard.Service";
-        var sourcePath = "./src";
-        var manifestPath = "root/DeploymentManifest.xml";
+        DirectoryPath sourcePath = "./src";
+        FilePath manifestPath = "root/DeploymentManifest.xml";
         var provisioningScriptPath = "ApplicationProvisioning_Script.sql";
+        DirectoryPath outputPath = $"./{applicationName}_ApprendaArchive";
+        DirectoryPath stagingPath = $"./{applicationName}_Binaries";
         // End - Configurable data
-
-        var outputPath = $"./{applicationName}_ApprendaArchive";
-        var stagingPath = $"./{applicationName}_Binaries";
 
         return new BuildParameters
         {
             Target = target,
             Configuration = configuration,
-            OutputPath = $"{outputPath}",
-            SolutionFilePath = $"{sourcePath}/{applicationName}.sln",
-            StagingPath = $"{stagingPath}",
+            OutputPath = outputPath,
+            SolutionFilePath = sourcePath.CombineWithFilePath($"{applicationName}.sln"),
+            StagingPath = stagingPath,
             WcfName = wcfName,
-            UiPublishPath = $"{sourcePath}/{uiName}/ReleaseBuild",
-            WcfBinariesPath = $"{sourcePath}/{wcfName}/bin/{configuration}",
-            DataTierProvisioningScript = $"{sourcePath}/{provisioningScriptPath}",
-            ApplicationManifest = $"{sourcePath}/{manifestPath}",
-            ApprendaArchive = $"{outputPath}/{applicationName}.zip",
+            UiPublishPath = sourcePath.Combine(uiName).Combine("ReleaseBuild"),
+            WcfBinariesPath = sourcePath.Combine(wcfName).Combine("bin").Combine($"{configuration}"),
+            DataTierProvisioningScriptFilePath = sourcePath.CombineWithFilePath($"{provisioningScriptPath}"),
+            ApplicationManifestFilePath = sourcePath.CombineWithFilePath(manifestPath),
+            ApprendaArchiveFilePath = outputPath.CombineWithFilePath($"{applicationName}.zip"),
         };
     }
 }

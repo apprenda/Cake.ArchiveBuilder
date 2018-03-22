@@ -15,7 +15,7 @@ This is a 3 tier application, with an ASP.NET user interface, a WCF service, and
 - root contains the ASP.NET user interface
 - TimeCard.Service is the WCF service (depends on TimeCard.Data)
 - ApplicationProvisioning_Script.sql contains the SQL Data Tier definition (tables, relationships, initial data, etc)
-- DeploymentManifest.xml contains the Apprenda-specific configuration settings for this application 
+- DeploymentManifest.xml contains the Apprenda-specific configuration settings for this application
 
 # What to modify
 This example was meant as a template so that you can reuse this method with any application you want to upload in Apprenda.
@@ -29,5 +29,8 @@ This example was meant as a template so that you can reuse this method with any 
 - Make any necessary modification to the Cake files
 - Make any necessary modifications to the source code for the application you intend to package
 - Simply execute .\build.ps1 from a PowerShell window and watch Cake do its magic
-- The binaries for your application will go to folder \{applicationName}_Binaries
-- You will find Apprenda application package (.zip file) in the folder \{applicationName}__ApprendaArchive. You can deploy this zip file to the Apprenda Cloud Platform directly using the Developer Portal, or can use this file as part of a larger CI/CD system that automatically deploys applications to Apprenda
+- The binaries for your application will go to folder {applicationName}_Binaries
+- You will find Apprenda application package (.zip file) in the folder {applicationName}__ApprendaArchive. You can deploy this zip file to the Apprenda Cloud Platform directly using the Developer Portal, or can use this file as part of a larger CI/CD system that automatically deploys applications to Apprenda
+
+# Debugging
+If you would like to debug your Cake process, you can follow the steps outlined in https://cakebuild.net/blog/2016/05/debug-cake-file. The build.ps1 PowerShell file supports a new parameter called DebugCake that will trigger the debugging process. Invoke as `.\build.ps1 -DebugCake`

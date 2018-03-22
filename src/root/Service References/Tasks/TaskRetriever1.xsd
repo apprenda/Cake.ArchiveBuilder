@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema xmlns:tns="urn:Apprenda.TaskRetrieverService" elementFormDefault="qualified" targetNamespace="urn:Apprenda.TaskRetrieverService" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="http://localhost:40000/TaskRetriever?xsd=xsd2" namespace="Apprenda.TaskRetrieverService" />
+  <xs:element name="ListTasks">
+    <xs:complexType>
+      <xs:sequence />
+    </xs:complexType>
+  </xs:element>
+  <xs:element name="ListTasksResponse">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element xmlns:q1="Apprenda.TaskRetrieverService" minOccurs="0" name="ListTasksResult" nillable="true" type="q1:ArrayOfTask" />
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>

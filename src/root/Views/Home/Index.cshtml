@@ -1,0 +1,283 @@
+﻿<link href="@Url.Content("~/Content/themes/base/jquery-ui.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/jquery.jqGrid/ui.jqgrid.css")" rel="stylesheet" type="text/css" />
+<link href="@Url.Content("~/Content/jquery.timepicker-1.1.2.min.css")" rel="stylesheet" type="text/css" />
+<script src="@Url.Content("~/Scripts/json2.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery-1.6.2.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery-ui-1.8.14.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.validate.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/i18n/grid.locale-en.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.jqGrid.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jQuery.tmpl.min.js")" type="text/javascript"></script>
+<script src="@Url.Content("~/Scripts/jquery.timepicker-1.1.2.min.js")" type="text/javascript"></script>
+
+@{
+    ViewBag.Title = "Home Page";
+
+    var grid = new Lib.Web.Mvc.JQuery.JqGrid.JqGridHelper<TimeCard.Models.EmployeeModel>("employees",
+        caption: "Employees",
+        dataType: Lib.Web.Mvc.JQuery.JqGrid.JqGridDataTypes.Json,
+        methodType: Lib.Web.Mvc.JQuery.JqGrid.JqGridMethodTypes.Post,
+        pager: false,
+        url: Url.Action("Employees"),
+        viewRecords: true,
+        hiddenEnabled: false
+    );
+}
+
+<div>
+@grid.GetHtml()
+</div>
+
+<div>
+    <input type="submit" id="addEmployeeButton" value="Add Employee"/>
+</div>
+
+<div id="timecards"></div>
+
+<div id="timeCardDetails"></div>
+
+<div id="newEmployee">
+
+    <p>First Name: <input type="text"" id="firstName" /></p>
+    <p>Last Name: <input type="text"" id="lastName" /></p>
+    <p>Title: <input type="text"" id="employeeTitle" /></p>
+
+    <input type="submit" id="saveEmployee" value="Save" />
+</div>
+
+<script id="existingTimeCard-tmpl" type="text/x-jquery-tmpl">
+    <p>Start Date: ${formatDate(StartDate)}</p>
+
+    <table style="width: 950px;">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Task</th>
+            </tr>
+        </thead>
+        {{each Entries }}
+            <tr>
+                <td>${formatDate($value.Date)}</td>
+                <td>${$value.StartTime}</td>
+                <td>${$value.EndTime}</td>
+                <td>${$value.Task}</td>
+            </tr>
+        {{/each}}
+    </table>
+</script>
+
+<div id="newTimeCard" style="display: none;">
+
+    <p>Start Date: <input type="text" id="startDate" /></p>
+
+    <a href="#" id="addTimeCardEntry">Add New Entry</a>
+    <table id="timeCardEntries" style="width: 950px;">
+        <thead>
+            <tr>
+                <th>Date</th>
+                <th>Start Time</th>
+                <th>End Time</th>
+                <th>Task</th>
+            </tr>
+        </thead>
+    </table>
+
+    <input type="submit" id="saveTimeCard" value="Save" />
+
+</div>
+
+<script id="employee-tmpl" type="text/x-jquery-tmpl">
+    
+    <input type="hidden" id="employeeId" value="${Id}" />
+    
+    ${FirstName} ${LastName}<br />
+    ${Title}</br>
+
+    {{if TimeCards.length }}
+        <h5>Time Cards</h5>
+        <ul>
+        {{each TimeCards }}
+            <li><a href="#" timecard-id="${$value.Id}">${formatDate($value.StartDate)}</a></li>
+        {{/each}}
+        </ul>
+    {{/if}}
+
+    <br/>
+    <input type="button" id="addNewTimeCard" value="Add Time Card"/>
+</script>
+
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        
+        availableTasks = false;
+        
+        @grid.GetJavaScript()
+
+        $('#startDate').datepicker({gotoCurrent: true, showButtonPanel: true, showOn: 'button'});
+
+        $('#newEmployee').dialog({ autoOpen: false, bgiframe: true, resizable: false, title: 'Add a New Employee', position: 'center', width: 600});
+
+        $('#timecards').dialog({ autoOpen: false, bgiframe: true, resizable: false, title: 'Employee Detail', position: 'center', width: 1000 } );
+
+        $('#timeCardDetails').dialog({ autoOpen: false, bgiframe: true, resizable: false, title: 'Create a New Time Card', position: 'center', width: 1000 });
+        
+        $('#addEmployeeButton').live('click', function(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            else {
+                e.returnValue = false;
+            }
+
+            $('#newEmployee').dialog('open');
+        });
+
+        $('a[employee-id]').live('click', function (e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            else {
+                e.returnValue = false;
+            }
+
+            $.post('@Url.Action("TimeCards")', { id: $(this).attr('employee-id') }, function(data) {
+                $('#timecards').empty();
+                $('#employee-tmpl').tmpl(data).appendTo('#timecards');
+                $('#timecards').dialog('open');
+            });
+        });
+
+        $('a[timecard-id]').live('click', function (e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            else {
+                e.returnValue = false;
+            }
+
+            $.post('@Url.Action("TimeCardDetail")', { id: $(this).attr('timecard-id') }, function(data) {
+               $('#timeCardDetails').empty();
+               $('#existingTimeCard-tmpl').tmpl(data).appendTo('#timeCardDetails');
+               $('#timecards').dialog('close');
+               $('#timeCardDetails').dialog('open');                 
+            });
+        });
+
+        $('#addNewTimeCard').live('click', function(e) {
+            if (e.preventDefault) {
+                e.preventDefault();
+            }
+            else  {
+                e.returnValue = false;
+            }
+
+            $('#timeCardDetails').empty().append($('#newTimeCard').show()).dialog('open');
+            addTimeCardEntryRow($('#timeCardEntries'),0);
+            $('#timecards').dialog('close');
+            
+        });
+
+        $('#saveEmployee').live('click', function(e) {
+            $.post('@Url.Action("AddEmployee")', {firstName: $('#firstName').val(), lastName: $('#lastName').val(), title: $('#employeeTitle').val()}, function(data) {
+                
+                $('#firstName').val('');
+                $('#lastName').val('');
+                $('#title').val('');
+                $('#newEmployee').dialog('close');
+                $('#employees').trigger('reloadGrid');
+                
+            });
+        });
+
+
+        $('#saveTimeCard').live('click', function(e) {
+            
+            var entriesToSave = [];
+
+            $('#timeCardEntries tr.editable').each(function(index, domElem) {
+                entriesToSave.push({
+                    Date: $(domElem).children('td').children('input[id^="date"]').val(),
+                    StartTime: $(domElem).children('td').children('input[id^="startTime"]').val(),
+                    EndTime: $(domElem).children('td').children('input[id^="endTime"]').val(),
+                    Task: $(domElem).children('td').children('input[id^="task"]').val()
+                });
+            });
+
+            $.ajax({
+                url: '@Url.Action("AddTimeCard")', 
+                type: 'POST',
+                dataType: 'json',
+                contentType: 'application/json, charset=utf-8',
+                data: JSON.stringify({EmployeeId: $('#employeeId').val(), StartDate: $('#startDate').val(), Entries: entriesToSave}), 
+                success: function(data) {
+                    $('#timeCardEntries tr td').remove();
+                    $('#timeCardDetails').dialog('close');
+                
+                }
+            });
+        });
+
+        $('#addTimeCardEntry').live('click', function(e) {
+
+            var table = $('#timeCardEntries');
+
+            var currentSize = $('#timeCardEntries tr').length - 1;
+
+            addTimeCardEntryRow(table, currentSize);
+        });
+
+    });
+
+    $.timeCardLinkFormatter = function(cellvalue, options, rowObject) {
+        return "<a href='#' employee-id='" + rowObject[0] + "'>" + cellvalue + "</a>";
+    };
+
+    function formatDate(datetime) {
+        var dateObj = new Date(parseInt(datetime.substr(6)));
+        var dateStr = (dateObj.getMonth()+1) + "/" + dateObj.getDate() + "/" + dateObj.getFullYear();
+        return dateStr; // will return mm/dd/yyyy
+    }
+
+    function addTimeCardEntryRow(table, index) {
+        
+        var date = $('<td>').append('<input type="text" class="datepicker" id="datepicker_' + index + '"/>');
+        var startTime = $('<td>').append('<input type="text" class="timepicker" id="startTime_' + index + '"/>');
+        var endTime = $('<td>').append('<input type="text" class="timepicker" id="endTime_' + index + '"/>');
+        
+        var taskField;
+        if (availableTasks) 
+        {
+             taskField = $('<select id="task_' + index + '"/>');
+
+             for (var i = 0; i < availableTasks.length; i++) {
+                taskField.append('<option value="' + availableTasks[i] + '">' + availableTasks[i] + '</option>');
+             }
+        }
+        else {
+            taskField = $('<input type="text" id="task_' + index + '">');
+        }
+
+        var task = $('<td>').append(taskField);
+
+        table.append($('<tr class="editable">').append(date).append(startTime).append(endTime).append(task));
+
+        $('.timepicker').timepicker({
+            zindex: 10000,
+            timeFormat: 'hh:mm p',
+            minHour: null,
+            minMinutes: null,
+            minTime: null,
+            maxHour: null,
+            maxMinutes: null,
+            maxTime: null,
+            startHour: 7,
+            startMinutes: 0,
+            startTime: null,
+            interval: 15});
+
+        $('.datepicker').datepicker({defaultDate: $('#startDate').val(), minDate: $('#startDate').val(), showButtonPanel: true, showOn: 'button'});
+    }
+</script>

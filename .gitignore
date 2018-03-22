@@ -17,6 +17,7 @@ tools/*
 TimeCard_ApprendaArchive/
 TimeCard_Binaries/
 **/ReleaseBuild
+**/src/archive/
 
 # MacOS
 .DS_Store
